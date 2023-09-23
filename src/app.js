@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const StatusCodes = require('http-status-codes').StatusCodes;
 const Logger = require('./config/logger');
 const morganMiddleware = require('./config/morganMiddleware');
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const sequelizeDB = require('./config/dbConnection');
 
 const indexRouter = require('./routes/index');
@@ -35,8 +36,7 @@ app.get('/', (req, res) => {
 app.use('/api', indexRouter);
 
 // throw 404 if URL not found
-app.all('*', function (req, res) {
-  res.status(StatusCodes.NOT_FOUND).json({ message: 'URL not found' });
-});
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;

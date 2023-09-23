@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelizeDB = require('../config/dbConnection');
+const Logger = require('../config/logger');
 
 const User = sequelizeDB.define(
   'user',
@@ -25,12 +26,12 @@ const User = sequelizeDB.define(
     password: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
     },
     status: {
       type: Sequelize.ENUM,
       values: ['active', 'inactive', 'suspended'],
       default: 'active',
+      allowNull: false,
     },
   },
   {
@@ -40,7 +41,7 @@ const User = sequelizeDB.define(
 );
 
 User.sync().then(() => {
-  console.log('users table is created');
+  Logger.info('users table is created');
 });
 
 module.exports = {

@@ -6,7 +6,7 @@ const sequelizeDB = new Sequelize(
   dbConfig.USER,
   dbConfig.PASSWORD,
   {
-    logging: false,
+    logging: true,
     host: dbConfig.HOST,
     dialect: dbConfig.dialect,
     operatorsAliases: false,
