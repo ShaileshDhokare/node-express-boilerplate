@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -10,6 +11,7 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const sequelizeDB = require('./config/dbConnection');
 
 const indexRouter = require('./routes/index');
+const { protect } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 app.use(morganMiddleware);
+
+app.use('/static', protect, express.static(path.join(__dirname, 'public')));
 
 sequelizeDB
   .authenticate()

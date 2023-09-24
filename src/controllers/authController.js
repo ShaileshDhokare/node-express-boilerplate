@@ -1,7 +1,7 @@
 const StatusCodes = require('http-status-codes').StatusCodes;
 const Logger = require('../config/logger');
 const { Op } = require('sequelize');
-const { User } = require('../models/User');
+const User = require('../models/User');
 const {
   hashPassword,
   generateJwtToken,
@@ -49,7 +49,7 @@ const loginUser = async (req, res) => {
       } else {
         metadata = { token };
       }
-
+      Logger.info('User has been successfully logged in.');
       res.status(StatusCodes.OK).json({
         message: 'You have successfully logged in.',
         data: userResponse,
@@ -94,7 +94,7 @@ const registerUser = async (req, res) => {
     } else {
       metadata = { token };
     }
-
+    Logger.info('User has been reqistered successfully.');
     res.status(StatusCodes.CREATED).json({
       message: 'User has been reqistered successfully.',
       data: userResponse,
@@ -105,7 +105,17 @@ const registerUser = async (req, res) => {
   }
 };
 
+const logoutUser = (req, res) => {
+  if (req.cookies.jwt) {
+    res.clearCookie('jwt');
+  }
+  res.status(StatusCodes.OK).json({
+    message: 'You have been successfully logged out.',
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
 };

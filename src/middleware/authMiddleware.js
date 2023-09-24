@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const StatusCodes = require('http-status-codes').StatusCodes;
-import { ErrorResponse } from '../utils/errorResponse';
-import { mapLoggedInUser } from '../utils/responseMapper';
+const Logger = require('../config/logger');
+const { ErrorResponse } = require('../utils/errorResponse');
+const { mapLoggedInUser } = require('../utils/responseMapper');
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
@@ -17,12 +18,11 @@ const protect = async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-
   // Make sure token exists
   if (!token) {
     return next(
       new ErrorResponse(
-        'Not authorized to access this route',
+        'Not authorized to access this route.',
         StatusCodes.UNAUTHORIZED
       )
     );
@@ -31,27 +31,23 @@ const protect = async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     const user = await User.findByPk(decoded.userId);
     if (!user) {
       return next(
         new ErrorResponse(
-          'Not authorized to access this route',
+          'Not authorized to access this route.',
           StatusCodes.UNAUTHORIZED
         )
       );
     }
-
+    Logger.info('User has been authorized successfully.');
     req.user = mapLoggedInUser(user);
     next();
   } catch (err) {
     return next(
-      new ErrorResponse(
-        'Not authorized to access this route',
-        StatusCodes.UNAUTHORIZED
-      )
+      new ErrorResponse(err.message, StatusCodes.INTERNAL_SERVER_ERROR)
     );
   }
 };
 
-export { protect };
+module.exports = { protect };

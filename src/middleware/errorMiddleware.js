@@ -1,5 +1,6 @@
 const StatusCodes = require('http-status-codes').StatusCodes;
 const { ErrorResponse } = require('../utils/errorResponse');
+const Logger = require('../config/logger');
 
 const notFound = (req, res, next) => {
   const error = new ErrorResponse(
@@ -10,9 +11,10 @@ const notFound = (req, res, next) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-  let statusCode = res.statusCode && StatusCodes.INTERNAL_SERVER_ERROR;
+  let statusCode = err.statusCode && StatusCodes.INTERNAL_SERVER_ERROR;
   let message = err.message;
 
+  Logger.error(message);
   res.status(statusCode).json({
     message: message,
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
