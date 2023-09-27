@@ -35,7 +35,7 @@ const loginUser = async (req, res) => {
       throw new ErrorResponse('Record not found', StatusCodes.UNAUTHORIZED);
     }
 
-    if (matchPassword(password, user.password)) {
+    if (await matchPassword(password, user.password)) {
       const userResponse = mapLoggedInUser(user);
 
       const token = generateJwtToken({

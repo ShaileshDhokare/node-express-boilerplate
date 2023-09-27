@@ -44,14 +44,29 @@ const updateUserProfile = async (req, res) => {
     }
 
     if (userProfile) {
-      userProfile = await UserProfile.findOne({
-        where: {
-          userId,
-        },
-        attributes: Object.keys(profileBody),
+      userProfile = await User.findByPk(userId, {
+        include: [
+          {
+            model: UserProfile,
+            attributes: [
+              'designation',
+              'profileSummary',
+              'avatar',
+              'country',
+              'gender',
+              'birthdate',
+            ],
+            as: 'profile',
+          },
+        ],
+        attributes: ['id', 'firstname', 'lastname', 'username', 'email'],
       });
-      userProfile.avatar = '/static/uploads/avatars/' + userProfile.avatar;
+
+      userProfile.profile.avatar =
+        '/static/uploads/avatars/' + userProfile.profile.avatar;
+
       Logger.info('Profile has been updated successfully.');
+
       res.status(StatusCodes.OK).json({
         message: 'Profile has been updated successfully.',
         data: userProfile,
@@ -87,6 +102,13 @@ const getUserProfile = async (req, res) => {
       ],
       attributes: ['id', 'firstname', 'lastname', 'username', 'email'],
     });
+
+    if (!userProfile) {
+      throw new ErrorResponse('Record not found', StatusCodes.UNAUTHORIZED);
+    }
+
+    userProfile.avatar = '/static/uploads/avatars/' + userProfile.avatar;
+
     Logger.info('[getUserProfile] - success');
 
     res.status(StatusCodes.OK).json({

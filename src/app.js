@@ -5,6 +5,7 @@ dotenv.config();
 
 const cookieParser = require('cookie-parser');
 const StatusCodes = require('http-status-codes').StatusCodes;
+
 const Logger = require('./config/logger');
 const morganMiddleware = require('./config/morganMiddleware');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
@@ -37,7 +38,7 @@ app.get('/', (req, res) => {
 });
 
 //API Routes
-app.use('/api', indexRouter);
+app.use('/api/v1', indexRouter);
 
 // throw 404 if URL not found
 app.use(notFound);
