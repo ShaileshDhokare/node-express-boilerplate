@@ -13,7 +13,8 @@ const { mapLoggedInUser } = require('../utils/responseMapper');
 
 const loginUser = async (req, res) => {
   const { email, username, password } = req.body;
-  const { httpCookie } = req.query;
+  let { httpCookie } = req.query;
+  httpCookie = httpCookie && httpCookie.toLowerCase() === 'true';
 
   try {
     const user = await User.findOne({
@@ -68,7 +69,8 @@ const loginUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   const { firstname, lastname, email, username, password } = req.body;
-  const { httpCookie } = req.query;
+  let { httpCookie } = req.query;
+  httpCookie = httpCookie && httpCookie.toLowerCase() === 'true';
 
   const hashedPassword = await hashPassword(password);
   try {
