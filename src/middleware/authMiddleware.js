@@ -19,6 +19,7 @@ const protect = async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
+
   try {
     if (token) {
       // Verify token
@@ -26,12 +27,7 @@ const protect = async (req, res, next) => {
       const user = await User.findByPk(decoded.userId);
 
       if (!user) {
-        return next(
-          new ErrorResponse(
-            'Not authorized to access this route.',
-            StatusCodes.UNAUTHORIZED
-          )
-        );
+        return next(new ErrorResponse('Not authorized to access this route.', StatusCodes.UNAUTHORIZED));
       }
 
       Logger.info('User has been authorized successfully.');
@@ -43,9 +39,7 @@ const protect = async (req, res, next) => {
         const credentials = authHeader.split(' ')[1];
 
         // Decode the base64-encoded credentials
-        const decodedCredentials = Buffer.from(credentials, 'base64').toString(
-          'utf-8'
-        );
+        const decodedCredentials = Buffer.from(credentials, 'base64').toString('utf-8');
 
         // Split the decoded credentials into username and password
         const [username, password] = decodedCredentials.split(':');
@@ -61,26 +55,14 @@ const protect = async (req, res, next) => {
           req.user = mapLoggedInUser(user);
           next();
         } else {
-          return next(
-            new ErrorResponse(
-              'Not authorized to access this route.',
-              StatusCodes.UNAUTHORIZED
-            )
-          );
+          return next(new ErrorResponse('Not authorized to access this route.', StatusCodes.UNAUTHORIZED));
         }
       } else {
-        return next(
-          new ErrorResponse(
-            'Not authorized to access this route.',
-            StatusCodes.UNAUTHORIZED
-          )
-        );
+        return next(new ErrorResponse('Not authorized to access this route.', StatusCodes.UNAUTHORIZED));
       }
     }
   } catch (error) {
-    return next(
-      new ErrorResponse(error.message, StatusCodes.INTERNAL_SERVER_ERROR)
-    );
+    return next(new ErrorResponse(error.message, StatusCodes.INTERNAL_SERVER_ERROR));
   }
 };
 

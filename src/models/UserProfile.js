@@ -1,7 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelizeDB = require('../config/dbConnection');
 const Logger = require('../config/logger');
-const { User } = require('./User');
 
 const UserProfile = sequelizeDB.define(
   'userProfile',
@@ -41,11 +40,6 @@ const UserProfile = sequelizeDB.define(
     timestamps: true,
   }
 );
-
-// UserProfile.belongsTo(User, {
-//   as: 'profile',
-//   foreignKey: 'userId',
-// });
 
 UserProfile.sync().then(() => {
   Logger.info('userProfiles table is created');

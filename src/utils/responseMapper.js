@@ -1,5 +1,6 @@
 const mapLoggedInUser = (user) => {
   const { id, firstname, lastname, username, email } = user;
+
   return {
     userId: id,
     name: firstname + ' ' + lastname,

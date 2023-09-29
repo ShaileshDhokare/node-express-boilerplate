@@ -1,19 +1,11 @@
 const StatusCodes = require('http-status-codes').StatusCodes;
 const Logger = require('../config/logger');
-const { Op } = require('sequelize');
 const UserProfile = require('../models/UserProfile');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
 const User = require('../models/User');
 
 const updateUserProfile = async (req, res) => {
-  const {
-    designation,
-    profileSummary,
-    avatarFileName,
-    country,
-    gender,
-    birthdate,
-  } = req.body;
+  const { designation, profileSummary, avatarFileName, country, gender, birthdate } = req.body;
   const userId = req.user.userId;
 
   try {
@@ -48,22 +40,14 @@ const updateUserProfile = async (req, res) => {
         include: [
           {
             model: UserProfile,
-            attributes: [
-              'designation',
-              'profileSummary',
-              'avatar',
-              'country',
-              'gender',
-              'birthdate',
-            ],
+            attributes: ['designation', 'profileSummary', 'avatar', 'country', 'gender', 'birthdate'],
             as: 'profile',
           },
         ],
         attributes: ['id', 'firstname', 'lastname', 'username', 'email'],
       });
 
-      userProfile.profile.avatar =
-        '/static/uploads/avatars/' + userProfile.profile.avatar;
+      userProfile.profile.avatar = '/static/uploads/avatars/' + userProfile.profile.avatar;
 
       Logger.info('Profile has been updated successfully.');
 
@@ -72,10 +56,7 @@ const updateUserProfile = async (req, res) => {
         data: userProfile,
       });
     } else {
-      throw new ErrorResponse(
-        'Failed to update user profile',
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
+      throw new ErrorResponse('Failed to update user profile', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   } catch (error) {
     setErrorResponse(res, error);
@@ -89,14 +70,7 @@ const getUserProfile = async (req, res) => {
       include: [
         {
           model: UserProfile,
-          attributes: [
-            'designation',
-            'profileSummary',
-            'avatar',
-            'country',
-            'gender',
-            'birthdate',
-          ],
+          attributes: ['designation', 'profileSummary', 'avatar', 'country', 'gender', 'birthdate'],
           as: 'profile',
         },
       ],

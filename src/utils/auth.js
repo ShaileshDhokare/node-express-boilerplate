@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
+
   return hashedPassword;
 };
 
@@ -11,6 +12,7 @@ const generateJwtToken = (user) => {
   const token = jwt.sign(user, process.env.JWT_SECRET, {
     expiresIn: '7d',
   });
+
   return token;
 };
 

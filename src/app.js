@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const StatusCodes = require('http-status-codes').StatusCodes;
 
 const Logger = require('./config/logger');
-const morganMiddleware = require('./config/morganMiddleware');
+const morganMiddleware = require('./middleware/morganMiddleware');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const sequelizeDB = require('./config/dbConnection');
 
@@ -25,7 +25,7 @@ app.use(morganMiddleware);
 app.use('/static', protect, express.static(path.join(__dirname, 'public')));
 
 sequelizeDB
-  .authenticate()
+  .authenticate() // eslint-disable-next-line
   .then((result) => {
     Logger.info('Connection has been established successfully.');
   })

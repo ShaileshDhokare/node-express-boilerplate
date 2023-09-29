@@ -2,12 +2,7 @@ const StatusCodes = require('http-status-codes').StatusCodes;
 const Logger = require('../config/logger');
 const { Op } = require('sequelize');
 const User = require('../models/User');
-const {
-  hashPassword,
-  generateJwtToken,
-  matchPassword,
-  setResponseCookies,
-} = require('../utils/auth');
+const { hashPassword, generateJwtToken, matchPassword, setResponseCookies } = require('../utils/auth');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
 const { mapLoggedInUser } = require('../utils/responseMapper');
 
@@ -22,14 +17,7 @@ const loginUser = async (req, res) => {
         [Op.or]: [email && { email }, username && { username }],
         status: 'active',
       },
-      attributes: [
-        'id',
-        'firstname',
-        'lastname',
-        'username',
-        'email',
-        'password',
-      ],
+      attributes: ['id', 'firstname', 'lastname', 'username', 'email', 'password'],
     });
 
     if (!user) {
@@ -50,6 +38,7 @@ const loginUser = async (req, res) => {
       } else {
         metadata = { token };
       }
+
       Logger.info('User has been successfully logged in.');
       res.status(StatusCodes.OK).json({
         message: 'You have successfully logged in.',
@@ -57,10 +46,7 @@ const loginUser = async (req, res) => {
         metadata,
       });
     } else {
-      throw new ErrorResponse(
-        "Password didn't matched",
-        StatusCodes.UNAUTHORIZED
-      );
+      throw new ErrorResponse("Password didn't matched", StatusCodes.UNAUTHORIZED);
     }
   } catch (error) {
     setErrorResponse(res, error);
@@ -74,7 +60,7 @@ const registerUser = async (req, res) => {
 
   const hashedPassword = await hashPassword(password);
   try {
-    let user = await User.create({
+    const user = await User.create({
       firstname,
       lastname,
       email,
@@ -96,6 +82,7 @@ const registerUser = async (req, res) => {
     } else {
       metadata = { token };
     }
+
     Logger.info('User has been reqistered successfully.');
     res.status(StatusCodes.CREATED).json({
       message: 'User has been reqistered successfully.',
@@ -111,6 +98,7 @@ const logoutUser = (req, res) => {
   if (req.cookies.jwt) {
     res.clearCookie('jwt');
   }
+
   res.status(StatusCodes.OK).json({
     message: 'You have been successfully logged out.',
   });
