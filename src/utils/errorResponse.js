@@ -1,24 +1,63 @@
 const StatusCodes = require('http-status-codes').StatusCodes;
 const Logger = require('../config/logger');
-const { getSequelizeErrorMessage, getSequelizeErrorData } = require('./mapSqlErrorResponse');
 
 class ErrorResponse extends Error {
-  constructor(message, statusCode) {
+  constructor(message, statusCode, errors = []) {
     super(message);
     this.statusCode = statusCode;
+    this.errors = errors;
 
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
+const getErrorMessage = (error) => {
+  if (error.parent && error.parent.sqlMessage) {
+    return error.parent.sqlMessage;
+  } else {
+    return error.message || error;
+  }
+};
+
+const getErrorData = (error) => {
+  if (error.errors && Array.isArray(error.errors)) {
+    return error.errors.map(({ message, type, path, value }) => ({
+      ...(message && { message }),
+      ...(type && { type }),
+      ...(path && { path }),
+      ...(value && { value }),
+    }));
+  }
+};
+
 const setErrorResponse = (res, error) => {
   const errorResponse = {
-    message: getSequelizeErrorMessage(error),
-    data: getSequelizeErrorData(error),
+    message: getErrorMessage(error),
+    data: getErrorData(error),
   };
 
   Logger.error({ ...errorResponse });
   res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(errorResponse);
 };
 
-module.exports = { ErrorResponse, setErrorResponse };
+const mapValidationErrors = (error) => {
+  if (error.inner && Array.isArray(error.inner)) {
+    const invalidFields = [];
+    const errors = error.inner.map(({ errors, path }) => {
+      invalidFields.push(path);
+
+      return {
+        ...(errors.length && { message: errors.join(', ') }),
+        ...(path && { path }),
+      };
+    });
+
+    const message = `Values provided to input fields(${invalidFields.join(', ')}) are not valid.`;
+
+    throw new ErrorResponse(message, StatusCodes.BAD_REQUEST, errors);
+  }
+
+  throw new ErrorResponse(error.message, StatusCodes.BAD_REQUEST);
+};
+
+module.exports = { ErrorResponse, setErrorResponse, mapValidationErrors };

@@ -5,6 +5,7 @@ const User = require('../models/User');
 const { hashPassword, generateJwtToken, matchPassword, setResponseCookies } = require('../utils/auth');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
 const { mapLoggedInUser } = require('../utils/responseMapper');
+const { validateUserLogin, validateUserRegister } = require('../services/auth');
 
 const loginUser = async (req, res) => {
   const { email, username, password } = req.body;
@@ -12,6 +13,8 @@ const loginUser = async (req, res) => {
   httpCookie = httpCookie && httpCookie.toLowerCase() === 'true';
 
   try {
+    validateUserLogin({ username: email || username, password });
+
     const user = await User.findOne({
       where: {
         [Op.or]: [email && { email }, username && { username }],
@@ -60,6 +63,8 @@ const registerUser = async (req, res) => {
 
   const hashedPassword = await hashPassword(password);
   try {
+    validateUserRegister({ firstname, lastname, email, username, password });
+
     const user = await User.create({
       firstname,
       lastname,

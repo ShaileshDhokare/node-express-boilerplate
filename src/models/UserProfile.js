@@ -33,6 +33,11 @@ const UserProfile = sequelizeDB.define(
     birthdate: {
       type: Sequelize.DATE,
       allowNull: false,
+      validate: {
+        isDate: {
+          msg: 'Please provide birthdate in YYYY-MM-DD format',
+        },
+      },
     },
   },
   {

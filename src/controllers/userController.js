@@ -3,12 +3,15 @@ const Logger = require('../config/logger');
 const UserProfile = require('../models/UserProfile');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
 const User = require('../models/User');
+const { validateUserProfile } = require('../services/user');
 
 const updateUserProfile = async (req, res) => {
   const { designation, profileSummary, avatarFileName, country, gender, birthdate } = req.body;
   const userId = req.user.userId;
 
   try {
+    validateUserProfile({ designation, profileSummary, country, gender, birthdate });
+
     let userProfile = await UserProfile.findOne({
       where: {
         userId,
