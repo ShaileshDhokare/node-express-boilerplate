@@ -52,16 +52,16 @@
       "./jest.setup.js"
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "*": [
       "npm run format:fix",
       "npm run lint:fix",
       "npm run test"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
