@@ -31,6 +31,12 @@ const getErrorData = (error) => {
 };
 
 const setErrorResponse = (res, error) => {
+  const sequelizeErrorNames = ['SequelizeUniqueConstraintError', 'SequelizeValidationError'];
+
+  if (sequelizeErrorNames.includes(error.name)) {
+    error.statusCode = 400;
+  }
+
   const errorResponse = {
     message: getErrorMessage(error),
     data: getErrorData(error),
