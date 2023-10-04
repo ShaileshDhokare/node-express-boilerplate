@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const StatusCodes = require('http-status-codes').StatusCodes;
+const { StatusCodes } = require('http-status-codes');
 const { Op } = require('sequelize');
 const Logger = require('../config/logger');
 const { ErrorResponse } = require('../utils/errorResponse');

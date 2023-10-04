@@ -1,4 +1,4 @@
-const StatusCodes = require('http-status-codes').StatusCodes;
+const { StatusCodes } = require('http-status-codes');
 const Logger = require('../config/logger');
 const UserProfile = require('../models/UserProfile');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');

@@ -1,4 +1,4 @@
-const StatusCodes = require('http-status-codes').StatusCodes;
+const { StatusCodes } = require('http-status-codes');
 const Logger = require('../config/logger');
 
 class ErrorResponse extends Error {
@@ -28,6 +28,8 @@ const getErrorData = (error) => {
       ...(value && { value }),
     }));
   }
+
+  return;
 };
 
 const setErrorResponse = (res, error) => {
@@ -47,7 +49,7 @@ const setErrorResponse = (res, error) => {
 };
 
 const mapValidationErrors = (error) => {
-  if (error.inner && Array.isArray(error.inner)) {
+  if (error.inner && Array.isArray(error.inner) && error.inner.length) {
     const invalidFields = [];
     const errors = error.inner.map(({ errors, path }) => {
       invalidFields.push(path);
@@ -66,4 +68,4 @@ const mapValidationErrors = (error) => {
   throw new ErrorResponse(error.message, StatusCodes.BAD_REQUEST);
 };
 
-module.exports = { ErrorResponse, setErrorResponse, mapValidationErrors };
+module.exports = { ErrorResponse, setErrorResponse, mapValidationErrors, getErrorMessage, getErrorData };

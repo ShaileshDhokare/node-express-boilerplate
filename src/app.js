@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 
 const cookieParser = require('cookie-parser');
-const StatusCodes = require('http-status-codes').StatusCodes;
+const { StatusCodes } = require('http-status-codes');
 
 const Logger = require('./config/logger');
 const morganMiddleware = require('./middleware/morganMiddleware');
