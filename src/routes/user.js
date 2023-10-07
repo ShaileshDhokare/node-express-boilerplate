@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const userController = require('../controllers/userController');
+const { fileUpload } = require('../utils/fileUpload');
 
-router.get('/', userController.getUsers);
-router.post('/', userController.addUser);
-// router.get('/:id', userController.getKpiDetails);
-// router.delete('/:id', userController.deleteKpi);
+router.post('/', fileUpload.single('avatar'), userController.updateUserProfile);
+router.get('/', userController.getUserProfile);
 
 module.exports = router;

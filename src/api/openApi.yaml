@@ -1,0 +1,371 @@
+openapi: 3.1.0
+info:
+  title: Node Blog REST APIs
+  version: '1.0.0'
+servers:
+  - url: /api/v1
+tags:
+  - name: Auth
+  - name: Profile
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register user account
+      parameters:
+        - name: httpCookie
+          in: query
+          required: false
+          description: pass true value to use http only cookie authentication
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBody'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        default:
+          description: Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user account
+      parameters:
+        - name: httpCookie
+          in: query
+          required: false
+          description: pass true value to use http only cookie authentication, provide username as username or email
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        default:
+          description: Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: User account logout
+      security:
+        - bearerAuth: []
+        - basicAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        default:
+          description: Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /profile:
+    post:
+      tags:
+        - Profile
+      summary: Update user profile
+      security:
+        - bearerAuth: []
+        - basicAuth: []
+      requestBody:
+        content:
+          multipart/form-data::
+            schema:
+              $ref: '#/components/schemas/UserProfileBody'
+            encoding:
+              profileImage: # Property name
+                contentType: image/png, image/jpeg, image/jpg
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        default:
+          description: Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Profile
+      summary: Get user profile
+      security:
+        - bearerAuth: []
+        - basicAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        default:
+          description: Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    SuccessMessage:
+      title: SuccessMessage
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      title: ErrorResponse
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              value:
+                type: string
+      example:
+        message: An error occurred
+        data:
+          - message: Invalid email
+            value: email
+          - message: Password is required
+            value: password
+    UserBody:
+      title: UserBody
+      required:
+        - firstname
+        - lastname
+        - username
+        - email
+        - password
+      type: object
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      example:
+        firstname: John
+        lastname: Doe
+        username: JohnDoe
+        email: john.doe@test.com
+        password: ''
+    User:
+      title: User
+      type: object
+      required:
+        - id
+        - firstname
+        - lastname
+        - username
+        - email
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+      example:
+        id: 1
+        name: John Doe
+        firstname: John
+        lastname: Doe
+        username: JohnDoe
+        email: john.doe@test.com
+    UserProfile:
+      title: UserProfile
+      type: object
+      required:
+        - designation
+        - profileSummary
+        - avatar
+        - country
+        - gender
+        - birthdate
+      properties:
+        designation:
+          type: string
+        profileSummary:
+          type: string
+          minLength: 20
+          maxLength: 300
+        avatar:
+          type: string
+          format: binary
+        country:
+          type: string
+        gender:
+          type: string
+          enum:
+            - Male
+            - Female
+            - Other
+        birthdate:
+          type: string
+          format: date
+      example:
+        designation: Sportperson
+        profileSummary: ''
+        avatar:
+        country: 'India'
+        gender: Male
+        birthdate: 'YYYY-MM-DD'
+    UserResponse:
+      title: UserResponse
+      required:
+        - message
+        - data
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/User'
+        metadata:
+          type: object
+          properties:
+            token:
+              type: string
+      example:
+        message: Register successfully
+        data:
+          id: 1
+          name: John Doe
+          firstname: John
+          lastname: Doe
+          username: JohnDoe
+          email: john.doe@test.com
+        metadata:
+          token: xyzxyz
+    UserLogin:
+      title: UserLogin
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      example:
+        username: JohnDoe
+        password: ''
+    UserProfileBody:
+      title: UserProfileBody
+      $ref: '#/components/schemas/UserProfile'
+      example:
+        designation: Sportperson
+        profileSummary: ''
+        avatar:
+        country: 'India'
+        gender: Male
+        birthdate: 'YYYY-MM-DD'
+    UserProfileResponse:
+      title: UserProfileResponse
+      type: object
+      required:
+        - id
+        - firstname
+        - lastname
+        - username
+        - email
+        - profile
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+      example:
+        id: 1
+        name: John Doe
+        firstname: John
+        lastname: Doe
+        username: JohnDoe
+        email: john.doe@test.com
+        profile:
+          designation: Sportperson
+          profileSummary: ''
+          avatar:
+          country: 'India'
+          gender: Male
+          birthdate: 'YYYY-MM-DD'

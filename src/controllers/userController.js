@@ -1,43 +1,81 @@
-const StatusCodes = require('http-status-codes').StatusCodes;
-// const { Op } = require('sequelize');
-const { User } = require('../models/User');
-const { hashPassword } = require('../utils/auth');
+const { StatusCodes } = require('http-status-codes');
+const Logger = require('../config/logger');
+const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
 
-const getUsers = async (req, res) => {
-  // let { page, size = 10, query } = req.query;
+const {
+  validateUserProfile,
+  updateUserProfile: updateProfileService,
+  createUserProfile,
+  getUserProfileById,
+  checkProfileExists,
+} = require('../services/user');
+
+const updateUserProfile = async (req, res) => {
+  const { designation, profileSummary, avatarFileName, country, gender, birthdate } = req.body;
+  const userId = req.user.userId;
+
   try {
-    const users = await User.findAndCountAll();
-    return res.status(200).json({
-      total_count: users.count,
-      data: users.rows,
-    });
+    validateUserProfile({ designation, profileSummary, country, gender, birthdate });
+
+    let userProfile = await checkProfileExists(userId);
+
+    const profileBody = {
+      userId,
+      designation,
+      profileSummary,
+      avatar: avatarFileName,
+      country,
+      gender,
+      birthdate,
+    };
+
+    if (userProfile) {
+      userProfile = await updateProfileService(userId, profileBody);
+    } else {
+      userProfile = await createUserProfile(profileBody);
+    }
+
+    if (userProfile) {
+      userProfile = await getUserProfileById(userId);
+
+      userProfile.profile.avatar = '/static/uploads/avatars/' + userProfile.profile.avatar;
+
+      Logger.info('Profile has been updated successfully.');
+
+      res.status(StatusCodes.OK).json({
+        message: 'Profile has been updated successfully.',
+        data: userProfile,
+      });
+    } else {
+      throw new ErrorResponse('Failed to update user profile', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    setErrorResponse(res, error);
   }
 };
 
-const addUser = async (req, res) => {
-  const { firstname, lastname, email, username, password } = req.body;
-  const hashedPassword = await hashPassword(password);
+const getUserProfile = async (req, res) => {
   try {
-    let user = await User.create({
-      firstname,
-      lastname,
-      email,
-      username,
-      password: hashedPassword,
-    });
+    const userId = req.user.userId;
+    const userProfile = await getUserProfileById(userId);
 
-    return res.status(200).json({
-      message: 'User has been reqistered successfully.',
-      data: user,
+    if (!userProfile) {
+      throw new ErrorResponse('Record not found', StatusCodes.UNAUTHORIZED);
+    }
+
+    userProfile.avatar = '/static/uploads/avatars/' + userProfile.avatar;
+
+    Logger.info('[getUserProfile] - success');
+
+    res.status(StatusCodes.OK).json({
+      data: userProfile,
     });
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    setErrorResponse(res, error);
   }
 };
 
 module.exports = {
-  addUser,
-  getUsers,
+  updateUserProfile,
+  getUserProfile,
 };
