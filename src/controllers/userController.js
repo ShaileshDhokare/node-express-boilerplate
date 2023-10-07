@@ -1,9 +1,14 @@
 const { StatusCodes } = require('http-status-codes');
 const Logger = require('../config/logger');
-const UserProfile = require('../models/UserProfile');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
-const User = require('../models/User');
-const { validateUserProfile } = require('../services/user');
+
+const {
+  validateUserProfile,
+  updateUserProfile: updateProfileService,
+  createUserProfile,
+  getUserProfileById,
+  checkProfileExists,
+} = require('../services/user');
 
 const updateUserProfile = async (req, res) => {
   const { designation, profileSummary, avatarFileName, country, gender, birthdate } = req.body;
@@ -12,11 +17,7 @@ const updateUserProfile = async (req, res) => {
   try {
     validateUserProfile({ designation, profileSummary, country, gender, birthdate });
 
-    let userProfile = await UserProfile.findOne({
-      where: {
-        userId,
-      },
-    });
+    let userProfile = await checkProfileExists(userId);
 
     const profileBody = {
       userId,
@@ -29,26 +30,13 @@ const updateUserProfile = async (req, res) => {
     };
 
     if (userProfile) {
-      userProfile = await UserProfile.update(profileBody, {
-        where: {
-          userId,
-        },
-      });
+      userProfile = await updateProfileService(userId, profileBody);
     } else {
-      userProfile = await UserProfile.create(profileBody);
+      userProfile = await createUserProfile(profileBody);
     }
 
     if (userProfile) {
-      userProfile = await User.findByPk(userId, {
-        include: [
-          {
-            model: UserProfile,
-            attributes: ['designation', 'profileSummary', 'avatar', 'country', 'gender', 'birthdate'],
-            as: 'profile',
-          },
-        ],
-        attributes: ['id', 'firstname', 'lastname', 'username', 'email'],
-      });
+      userProfile = await getUserProfileById(userId);
 
       userProfile.profile.avatar = '/static/uploads/avatars/' + userProfile.profile.avatar;
 
@@ -69,16 +57,7 @@ const updateUserProfile = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const userProfile = await User.findByPk(userId, {
-      include: [
-        {
-          model: UserProfile,
-          attributes: ['designation', 'profileSummary', 'avatar', 'country', 'gender', 'birthdate'],
-          as: 'profile',
-        },
-      ],
-      attributes: ['id', 'firstname', 'lastname', 'username', 'email'],
-    });
+    const userProfile = await getUserProfileById(userId);
 
     if (!userProfile) {
       throw new ErrorResponse('Record not found', StatusCodes.UNAUTHORIZED);

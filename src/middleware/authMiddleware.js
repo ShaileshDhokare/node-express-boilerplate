@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
 const { StatusCodes } = require('http-status-codes');
-const { Op } = require('sequelize');
 const Logger = require('../config/logger');
 const { ErrorResponse } = require('../utils/errorResponse');
 const { mapLoggedInUser } = require('../utils/responseMapper');
 const User = require('../models/User');
 const { matchPassword } = require('../utils/auth');
+const { findUser } = require('../services/auth');
 
 const protect = async (req, res, next) => {
   let accessToken;
@@ -43,12 +43,7 @@ const protect = async (req, res, next) => {
 
         // Split the decoded credentials into username and password
         const [username, password] = decodedCredentials.split(':');
-        const user = await User.findOne({
-          where: {
-            [Op.or]: [{ email: username }, { username }],
-            status: 'active',
-          },
-        });
+        const user = await findUser(username);
 
         if (user && (await matchPassword(password, user.password))) {
           Logger.info('User has been authorized successfully.');

@@ -1,27 +1,19 @@
 const { StatusCodes } = require('http-status-codes');
 const Logger = require('../config/logger');
-const { Op } = require('sequelize');
-const User = require('../models/User');
 const { hashPassword, generateJwtToken, matchPassword, setResponseCookies } = require('../utils/auth');
 const { ErrorResponse, setErrorResponse } = require('../utils/errorResponse');
 const { mapLoggedInUser } = require('../utils/responseMapper');
-const { validateUserLogin, validateUserRegister } = require('../services/auth');
+const { validateUserLogin, validateUserRegister, createUser, findUser } = require('../services/auth');
 
 const loginUser = async (req, res) => {
-  const { email, username, password } = req.body;
+  const { username, password } = req.body;
   let { httpCookie } = req.query;
   httpCookie = httpCookie && httpCookie.toLowerCase() === 'true';
 
   try {
-    validateUserLogin({ username: email || username, password });
+    validateUserLogin({ username, password });
 
-    const user = await User.findOne({
-      where: {
-        [Op.or]: [email && { email }, username && { username }],
-        status: 'active',
-      },
-      attributes: ['id', 'firstname', 'lastname', 'username', 'email', 'password'],
-    });
+    const user = await findUser(username);
 
     if (!user) {
       throw new ErrorResponse('Record not found', StatusCodes.UNAUTHORIZED);
@@ -65,14 +57,16 @@ const registerUser = async (req, res) => {
   try {
     validateUserRegister({ firstname, lastname, email, username, password });
 
-    const user = await User.create({
+    const userPayload = {
       firstname,
       lastname,
       email,
       username,
       password: hashedPassword,
       status: 'active',
-    });
+    };
+
+    const user = await createUser(userPayload);
 
     const userResponse = mapLoggedInUser(user);
 

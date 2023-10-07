@@ -1,5 +1,7 @@
 const { object, string } = require('yup');
+const { Op } = require('sequelize');
 const { mapValidationErrors } = require('../utils/errorResponse');
+const User = require('../models/User');
 
 const validateUserLogin = (inputData) => {
   const loginSchema = object({
@@ -30,7 +32,23 @@ const validateUserRegister = (inputData) => {
   }
 };
 
+const createUser = (userPayload) => {
+  return User.create(userPayload);
+};
+
+const findUser = (username) => {
+  return User.findOne({
+    where: {
+      [Op.or]: [{ email: username }, { username }],
+      status: 'active',
+    },
+    attributes: ['id', 'firstname', 'lastname', 'username', 'email', 'password'],
+  });
+};
+
 module.exports = {
   validateUserLogin,
   validateUserRegister,
+  createUser,
+  findUser,
 };
