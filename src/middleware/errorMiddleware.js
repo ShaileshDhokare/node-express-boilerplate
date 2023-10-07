@@ -9,7 +9,7 @@ const notFound = (req, res, next) => {
 
 // eslint-disable-next-line
 const errorHandler = (err, req, res, next) => {
-  const statusCode = err.statusCode && StatusCodes.INTERNAL_SERVER_ERROR;
+  const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
   const message = err.message;
 
   Logger.error(message);

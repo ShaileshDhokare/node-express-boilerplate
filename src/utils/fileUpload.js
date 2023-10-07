@@ -1,5 +1,7 @@
 const multer = require('multer');
 const path = require('path');
+const { ErrorResponse } = require('./errorResponse');
+const { StatusCodes } = require('http-status-codes');
 
 // Define storage configuration for multer
 const storage = multer.diskStorage({
@@ -22,7 +24,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedExtensions.includes(fileExt)) {
     cb(null, true);
   } else {
-    cb(new Error('Only jpg, jpeg, and png files are allowed.'));
+    cb(new ErrorResponse('Only jpg, jpeg, and png files are allowed.', StatusCodes.BAD_REQUEST));
   }
 };
 

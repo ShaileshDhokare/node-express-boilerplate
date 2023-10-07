@@ -30,21 +30,21 @@ const loginUser = async (req, res) => {
     if (await matchPassword(password, user.password)) {
       const userResponse = mapLoggedInUser(user);
 
-      const token = generateJwtToken({
+      const accessToken = generateJwtToken({
         userId: user.id,
         username: userResponse.name,
       });
 
       let metadata = undefined;
       if (httpCookie) {
-        setResponseCookies(res, token);
+        setResponseCookies(res, accessToken);
       } else {
-        metadata = { token };
+        metadata = { accessToken };
       }
 
       Logger.info('User has been successfully logged in.');
       res.status(StatusCodes.OK).json({
-        message: 'You have successfully logged in.',
+        message: 'User has been successfully logged in.',
         data: userResponse,
         metadata,
       });
@@ -76,16 +76,16 @@ const registerUser = async (req, res) => {
 
     const userResponse = mapLoggedInUser(user);
 
-    const token = generateJwtToken({
+    const accessToken = generateJwtToken({
       userId: user.id,
       username: userResponse.name,
     });
 
     let metadata = undefined;
     if (httpCookie) {
-      setResponseCookies(res, token);
+      setResponseCookies(res, accessToken);
     } else {
-      metadata = { token };
+      metadata = { accessToken };
     }
 
     Logger.info('User has been reqistered successfully.');
@@ -100,8 +100,8 @@ const registerUser = async (req, res) => {
 };
 
 const logoutUser = (req, res) => {
-  if (req.cookies.jwt) {
-    res.clearCookie('jwt');
+  if (req.cookies.accessToken) {
+    res.clearCookie('accessToken');
   }
 
   res.status(StatusCodes.OK).json({

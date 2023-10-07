@@ -8,22 +8,22 @@ const User = require('../models/User');
 const { matchPassword } = require('../utils/auth');
 
 const protect = async (req, res, next) => {
-  let token;
+  let accessToken;
 
   const authHeader = req.headers.authorization;
 
   if (authHeader && authHeader.startsWith('Bearer')) {
     // Set token from Bearer token in header
-    token = authHeader.split(' ')[1];
+    accessToken = authHeader.split(' ')[1];
     // Set token from cookie
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
+  } else if (req.cookies.accessToken) {
+    accessToken = req.cookies.accessToken;
   }
 
   try {
-    if (token) {
+    if (accessToken) {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
       const user = await User.findByPk(decoded.userId);
 
       if (!user) {
@@ -62,7 +62,7 @@ const protect = async (req, res, next) => {
       }
     }
   } catch (error) {
-    return next(new ErrorResponse(error.message, StatusCodes.INTERNAL_SERVER_ERROR));
+    return next(new ErrorResponse(error.message, error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR));
   }
 };
 
