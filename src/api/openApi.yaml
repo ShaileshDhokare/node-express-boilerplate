@@ -47,7 +47,7 @@ paths:
         - name: httpCookie
           in: query
           required: false
-          description: pass true value to use http only cookie authentication
+          description: pass true value to use http only cookie authentication, provide username as username or email
           schema:
             type: boolean
       requestBody:
@@ -55,8 +55,7 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/UserLoginEmail'
-                - $ref: '#/components/schemas/UserLoginUsername'
+                - $ref: '#/components/schemas/UserLogin'
       responses:
         '200':
           description: Success
@@ -305,24 +304,8 @@ components:
           email: john.doe@test.com
         metadata:
           token: xyzxyz
-    UserLoginEmail:
-      title: UserLoginEmail
-      required:
-        - email
-        - password
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          format: password
-      example:
-        email: john.doe@test.com
-        password: ''
-    UserLoginUsername:
-      title: UserLoginUsername
+    UserLogin:
+      title: UserLogin
       required:
         - username
         - password
