@@ -68,7 +68,22 @@ Protect API endpoints from abuse and DoS attacks by implementing rate limiting u
 
 Manage environment-specific configurations using dotenv. Load environment variables from a .env file into process.env, allowing for easy configuration of database connections, API keys, and other sensitive information.
 
-### Command Guide
+## Setup Guide
+
+### 1. Clone Repository
+
+Clone the repository to your local machine
+
+### 2. Install Dependencies
+
+Install the required dependencies using npm
+
+### 3. Environment Configuration
+
+Locate the `.env-example` file in the root directory and rename it to `.env`
+Open the `.env` file and provide values for environment variables, including database credentials and other configuration settings.
+
+## Command Guide
 
 - **Run Tests:**
 
